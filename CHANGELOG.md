@@ -47,6 +47,8 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Fixed
 
+- Make GitHub Actions use Node 24-compatible pinned action releases and keep dependency-tool
+  deprecation warnings from being promoted to CI failures by the source-test warning policy.
 - Reject IDs that collide after string normalization and missing group labels.
 - Require every class on both sides of group-aware outer and inner classification splits.
 - Reject non-finite configuration values, malformed model predictions, and non-finite custom

@@ -16,8 +16,8 @@ typecheck:
 	mypy src/agentic_al
 
 audit:
-	bandit -r src/agentic_al
-	pip-audit --local --skip-editable
+	PYTHONWARNINGS=default bandit -r src/agentic_al
+	PYTHONWARNINGS=default pip-audit --local --skip-editable
 
 package:
 	python -m build
