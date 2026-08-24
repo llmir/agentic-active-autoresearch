@@ -1,0 +1,58 @@
+project_name: synthetic-gpu-classification
+
+dataset:
+  kind: synthetic
+  task: classification
+  synthetic_samples: 2000
+  synthetic_features: 24
+  synthetic_informative: 12
+  synthetic_classes: 2
+
+run:
+  seed: 42
+  rounds: 8
+  initial_size: 160
+  batch_size: 80
+  output_dir: outputs/gpu-classification
+
+model:
+  name: torch_mlp
+  device: auto
+  require_accelerator: true
+  parameters:
+    hidden_dims: [512, 256, 128]
+    dropout: 0.10
+    epochs: 120
+    batch_size: 256
+    learning_rate: 0.001
+    weight_decay: 0.00001
+    ensemble_size: 5
+    mc_dropout_passes: 30
+
+inner_loop:
+  enabled: true
+  candidate_generator: rule_based
+  trial_budget: 6
+  candidates_per_step: 1
+  validation_fraction: 0.25
+  min_labeled_size: 24
+  selection_metric: balanced_accuracy
+  selection_mode: max
+  require_control: true
+  candidate_paradigms:
+    - retrain_from_scratch
+    - finetune_global_best
+    - finetune_previous_round
+    - curriculum_training
+  tunable_parameters:
+    learning_rate: [0.00001, 0.005]
+    dropout: [0.0, 0.5]
+    weight_decay: [0.0, 0.01]
+
+acquisition:
+  weights: {uncertainty: 0.55, diversity: 0.25, random: 0.15, target: 0.05}
+  goal: target_class
+  target_class: 1
+
+agent:
+  enabled: false

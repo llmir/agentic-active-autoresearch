@@ -1,0 +1,29 @@
+name: Bug report
+description: Report a reproducible Agentic Active AutoResearch defect without private data.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "Do not paste API keys, private endpoints, datasets, molecule lists, or personal paths."
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Use synthetic or sanitized data.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Sanitized doctor output
+      render: shell
+    validations:
+      required: true

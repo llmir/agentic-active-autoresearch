@@ -1,0 +1,92 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agentic-active-autoresearch"
+version = "0.1.0"
+description = "Auditable agentic active autoresearch with nested active-learning and training-plan loops."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+keywords = ["active-learning", "agentic-ai", "molecular-discovery", "uncertainty", "bayesian-optimization"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+  "numpy>=1.24",
+  "pandas>=2.0",
+  "pydantic>=2.7",
+  "PyYAML>=6.0",
+  "scikit-learn>=1.3",
+  "torch>=2.2",
+]
+
+[project.optional-dependencies]
+molecule = ["rdkit>=2023.9.1"]
+chemprop = ["chemprop>=2.1"]
+parquet = ["pyarrow>=15"]
+dev = [
+  "bandit>=1.8,<2",
+  "build>=1.2",
+  "mypy>=1.10",
+  "pandas-stubs>=2.2",
+  "pip-audit>=2.9,<3",
+  "pre-commit>=3.7",
+  "pytest>=8.2",
+  "pytest-cov>=5.0",
+  "ruff>=0.6",
+  "twine>=5.1",
+  "types-PyYAML>=6.0",
+]
+
+[project.scripts]
+agentic-autoresearch = "agentic_al.cli:main"
+agentic-al = "agentic_al.cli:main"
+
+[project.urls]
+Documentation = "https://github.com/llmir/agentic-active-autoresearch#readme"
+Issues = "https://github.com/llmir/agentic-active-autoresearch/issues"
+Source = "https://github.com/llmir/agentic-active-autoresearch"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agentic_al"]
+
+[tool.pytest.ini_options]
+addopts = "-q --strict-markers --strict-config"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["agentic_al"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+fail_under = 85
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = ["E501"]
+
+[tool.mypy]
+warn_unused_configs = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+check_untyped_defs = true
+ignore_missing_imports = true
+# Keep type checking deterministic even when an optional scientific environment
+# contributes third-party stubs that target a different Python release.
+no_site_packages = true

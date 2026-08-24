@@ -1,0 +1,60 @@
+project_name: custom-training-candidates-gpu-demo
+
+dataset:
+  kind: synthetic
+  task: regression
+  synthetic_samples: 160
+  synthetic_features: 10
+  synthetic_informative: 6
+  noise: 6.0
+
+split:
+  validation_fraction: 0.20
+
+run:
+  seed: 23
+  rounds: 1
+  initial_size: 24
+  batch_size: 8
+  output_dir: outputs/custom-training-candidates-gpu
+
+model:
+  name: torch_mlp
+  featurizer: tabular
+  device: auto
+  require_accelerator: true
+  parameters:
+    hidden_dims: [64, 32]
+    dropout: 0.10
+    epochs: 12
+    batch_size: 32
+    learning_rate: 0.001
+    weight_decay: 0.00001
+    ensemble_size: 1
+    mc_dropout_passes: 4
+
+inner_loop:
+  enabled: true
+  candidate_generator: conservative_training
+  trial_budget: 3
+  candidates_per_step: 1
+  validation_fraction: 0.25
+  min_labeled_size: 16
+  selection_metric: mae
+  selection_mode: min
+  require_control: true
+  candidate_paradigms: [retrain_from_scratch]
+  tunable_parameters:
+    learning_rate: [0.00001, 0.005]
+
+acquisition:
+  weights:
+    uncertainty: 0.50
+    diversity: 0.30
+    random: 0.15
+    target: 0.05
+  goal: minimize
+
+agent:
+  enabled: false
+  provider: rule_based

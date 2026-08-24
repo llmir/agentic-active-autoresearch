@@ -1,0 +1,62 @@
+project_name: provider-neutral-agentic-gpu
+dataset:
+  kind: synthetic
+  task: regression
+  synthetic_samples: 2000
+  synthetic_features: 24
+run:
+  seed: 42
+  rounds: 8
+  initial_size: 160
+  batch_size: 80
+  output_dir: outputs/provider-neutral-agentic-gpu
+model:
+  name: torch_mlp
+  device: auto
+  require_accelerator: true
+  parameters:
+    hidden_dims: [512, 256, 128]
+    dropout: 0.10
+    epochs: 120
+    batch_size: 256
+    learning_rate: 0.001
+    weight_decay: 0.00001
+    ensemble_size: 5
+    mc_dropout_passes: 30
+inner_loop:
+  enabled: true
+  candidate_generator: auto
+  trial_budget: 6
+  candidates_per_step: 1
+  validation_fraction: 0.25
+  selection_metric: mae
+  selection_mode: min
+  require_control: true
+  candidate_paradigms:
+    - retrain_from_scratch
+    - finetune_global_best
+    - finetune_previous_round
+    - curriculum_training
+    - robust_loss_training
+  tunable_parameters:
+    learning_rate: [0.00001, 0.005]
+    dropout: [0.0, 0.5]
+    weight_decay: [0.0, 0.01]
+acquisition:
+  weights: {uncertainty: 0.50, diversity: 0.30, random: 0.15, target: 0.05}
+  goal: minimize
+guardrails:
+  enabled: true
+  max_agent_delta: 0.10
+  max_component_weight: 0.75
+agent:
+  enabled: true
+  provider: openai_compatible
+  base_url_env: AGENTIC_AL_API_BASE
+  api_key_env: AGENTIC_AL_API_KEY # pragma: allowlist secret -- variable name, never a value
+  model_env: AGENTIC_AL_MODEL
+  model: ""
+  timeout_seconds: 30
+  max_response_bytes: 1000000
+  allow_local_http: true
+  fallback_to_rule_based: true

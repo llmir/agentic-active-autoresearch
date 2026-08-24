@@ -1,0 +1,38 @@
+# Secrets and local settings
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+credentials*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+
+# Generated data, models, and runs
+data/
+outputs/
+runs/
+checkpoints/
+*.ckpt
+*.pt
+*.pth
+*.pkl
+*.joblib
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/

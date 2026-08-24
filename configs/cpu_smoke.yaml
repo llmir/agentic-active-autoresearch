@@ -1,0 +1,25 @@
+project_name: cpu-smoke-only
+dataset:
+  kind: synthetic
+  task: regression
+  synthetic_samples: 240
+run:
+  seed: 42
+  rounds: 2
+  initial_size: 24
+  batch_size: 12
+  output_dir: outputs/cpu-smoke
+model:
+  name: random_forest
+  device: cpu
+  require_accelerator: false
+  parameters: {n_estimators: 96, min_samples_leaf: 2, n_jobs: 1}
+inner_loop:
+  enabled: false
+  trial_budget: 1
+  candidate_paradigms: [retrain_from_scratch]
+acquisition:
+  weights: {uncertainty: 0.5, diversity: 0.3, random: 0.15, target: 0.05}
+  goal: minimize
+agent:
+  enabled: false

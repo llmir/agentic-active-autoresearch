@@ -1,0 +1,73 @@
+project_name: external-oracle-regression
+
+dataset:
+  kind: csv
+  path: ../data/external_pool.csv
+  task: regression
+  id_column: sample_id
+  generate_id_if_missing: false
+  target_column: measurement
+  feature_columns: [descriptor_a, descriptor_b]
+  group_column: series_id
+
+split:
+  validation_fraction: 0.2  # ignored when validation_data is supplied through the Python API
+
+run:
+  seed: 42
+  rounds: 4
+  initial_size: 24
+  batch_size: 12
+  output_dir: ../outputs/external-oracle-regression
+  store_observations: true
+
+model:
+  name: torch_mlp
+  featurizer: tabular
+  device: auto
+  require_accelerator: true
+  parameters:
+    hidden_dims: [256, 128]
+    dropout: 0.1
+    epochs: 80
+    batch_size: 64
+    learning_rate: 0.001
+    weight_decay: 0.00001
+    ensemble_size: 3
+    mc_dropout_passes: 20
+
+inner_loop:
+  enabled: true
+  candidate_generator: rule_based
+  trial_budget: 6
+  candidates_per_step: 1
+  validation_fraction: 0.25
+  selection_metric: mae
+  selection_mode: min
+  require_control: true
+  candidate_paradigms:
+    - retrain_from_scratch
+    - finetune_global_best
+    - finetune_previous_round
+    - curriculum_training
+    - robust_loss_training
+  tunable_parameters:
+    learning_rate: [0.00001, 0.005]
+    dropout: [0.0, 0.5]
+    weight_decay: [0.0, 0.01]
+
+acquisition:
+  weights:
+    uncertainty: 0.45
+    diversity: 0.25
+    representativeness: 0.10
+    group_coverage: 0.10
+    random: 0.10
+  goal: minimize
+
+guardrails:
+  enabled: true
+
+agent:
+  enabled: false
+  provider: rule_based

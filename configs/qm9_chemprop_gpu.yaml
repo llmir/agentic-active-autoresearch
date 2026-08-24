@@ -1,0 +1,59 @@
+project_name: qm9-lumo-chemprop-gpu
+dataset:
+  kind: csv
+  path: ../data/qm9.csv
+  task: regression
+  id_column: sample_id
+  generate_id_if_missing: true
+  target_column: lumo
+  feature_columns: [smiles]
+  group_column: scaffold
+run:
+  seed: 42
+  rounds: 10
+  initial_size: 1000
+  batch_size: 1000
+  output_dir: outputs/qm9-chemprop-gpu
+model:
+  name: chemprop
+  featurizer: morgan
+  smiles_column: smiles
+  fingerprint_bits: 2048
+  device: auto
+  require_accelerator: true
+  parameters:
+    epochs: 80
+    batch_size: 128
+    depth: 4
+    message_hidden_dim: 600
+    ffn_hidden_dim: 600
+    ffn_num_layers: 2
+    dropout: 0.10
+    learning_rate: 0.0005
+    ensemble_size: 3
+    mc_dropout_passes: 30
+    num_workers: 0
+    split_sizes: [0.8, 0.1, 0.1]
+inner_loop:
+  enabled: true
+  candidate_generator: rule_based
+  trial_budget: 3
+  candidates_per_step: 1
+  validation_fraction: 0.20
+  min_labeled_size: 100
+  selection_metric: mae
+  selection_mode: min
+  require_control: true
+  candidate_paradigms: [retrain_from_scratch]
+  tunable_parameters:
+    learning_rate: [0.00001, 0.003]
+    dropout: [0.0, 0.5]
+acquisition:
+  weights: {uncertainty: 0.50, diversity: 0.30, random: 0.10, target: 0.10}
+  goal: target_range
+  target_range: [-0.20, -0.10]
+guardrails:
+  enabled: true
+  max_agent_delta: 0.10
+agent:
+  enabled: false

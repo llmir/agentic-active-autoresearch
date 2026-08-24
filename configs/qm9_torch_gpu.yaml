@@ -1,0 +1,62 @@
+project_name: qm9-lumo-torch-gpu
+dataset:
+  kind: csv
+  path: ../data/qm9.csv
+  task: regression
+  id_column: sample_id
+  generate_id_if_missing: true
+  target_column: lumo
+  feature_columns: [smiles]
+  group_column: scaffold
+run:
+  seed: 42
+  rounds: 10
+  initial_size: 1000
+  batch_size: 1000
+  output_dir: outputs/qm9-torch-gpu
+model:
+  name: torch_mlp
+  featurizer: morgan
+  smiles_column: smiles
+  fingerprint_radius: 2
+  fingerprint_bits: 2048
+  device: auto
+  require_accelerator: true
+  parameters:
+    hidden_dims: [1024, 512, 256]
+    dropout: 0.10
+    epochs: 150
+    batch_size: 512
+    learning_rate: 0.001
+    weight_decay: 0.00001
+    ensemble_size: 5
+    mc_dropout_passes: 30
+inner_loop:
+  enabled: true
+  candidate_generator: rule_based
+  trial_budget: 6
+  candidates_per_step: 1
+  validation_fraction: 0.20
+  min_labeled_size: 100
+  selection_metric: mae
+  selection_mode: min
+  require_control: true
+  candidate_paradigms:
+    - retrain_from_scratch
+    - finetune_global_best
+    - finetune_previous_round
+    - curriculum_training
+    - robust_loss_training
+  tunable_parameters:
+    learning_rate: [0.00001, 0.005]
+    dropout: [0.0, 0.5]
+    weight_decay: [0.0, 0.01]
+acquisition:
+  weights: {uncertainty: 0.50, diversity: 0.30, random: 0.10, target: 0.10}
+  goal: target_range
+  target_range: [-0.20, -0.10]
+guardrails:
+  enabled: true
+  max_agent_delta: 0.10
+agent:
+  enabled: false
